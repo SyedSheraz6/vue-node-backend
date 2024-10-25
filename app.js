@@ -7,7 +7,6 @@ const app = express()
 
 const MONGOD_DB_URL = 'mongodb+srv://sherazsyed16:TwkxBkv21biHhcNA@cluster0.fwxks.mongodb.net/crud?retryWrites=true&w=majority&appName=Cluster0'
 
-// app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*')
