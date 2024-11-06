@@ -11,12 +11,12 @@ const isAuth = (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1]
+    
     if (!token) {
         const error = new Error('Not Authenticated. Login first!')
         error.statusCode = 422
         throw error
     }
-    
     let authToken;
     try {
         authToken = jwt.verify(token, SECRET_KEY)

@@ -8,6 +8,7 @@ const router = express.Router()
 
 
 router.get('/', homeControllers.getPosts)
+router.get('/my-posts', isAuth , homeControllers.getMyPosts)
 
 router.post('/create', [
     body('title').trim().isLength({min: 4}).withMessage('Title should be atleast 4 characters'),

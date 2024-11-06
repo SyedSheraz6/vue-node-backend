@@ -2,6 +2,8 @@ const { validationResult } = require('express-validator')
 const fs = require('fs')
 const path = require('path')
 
+const { getIo } = require('../socket')
+
 const Post = require('../models/post')
 const User = require('../models/user')
 
@@ -18,14 +20,25 @@ exports.getPosts = async (req, res, next) => {
 
 }
 
+exports.getMyPosts = async (req, res, next) => {
+    try {
+        const posts = await Post.find({creator: req.userId})
+        res.status(200).json({
+            message: 'Post fetched successfully!',
+            data: posts,
+        })
+    } catch (error) {
+        next(error)
+    }
+
+}
+
 exports.createPost = async (req, res, next) => {
     const title = req.body.title
     const subject = req.body.subject
     const message = req.body.message
     const creator = req.userId
     const imageUrl = req.file.path
-
-    // imageUrl = imageUrl.replace(/\\/g, '/');
 
     const errors = validationResult(req)
 
@@ -47,6 +60,7 @@ exports.createPost = async (req, res, next) => {
             const user = await User.findById(creator)
             user.posts.push(post._id)
             await user.save()
+            getIo().emit('posts', {action: 'create', post: post})
             res.status(200).json({
                 message: 'Post created successfully!',
                 data: post,
@@ -95,10 +109,11 @@ exports.updatePost = async (req, res, next) => {
         post.message = message
         post.imageUrl = imageUrl
 
-        await post.save()
+        const updatedPost = await post.save()
+        getIo().emit('posts', {action: 'update', post: updatedPost})
         res.status(200).json({
             message: 'Message updated successfully!',
-            data: post,
+            data: updatedPost,
         })
 
     } catch (error) {
@@ -125,6 +140,7 @@ exports.deletePost = async (req, res, next) => {
         const user = await User.findById(req.userId)
         user.posts.pull(postId)
         await user.save()
+        getIo().emit('posts', {action: 'delete', postId: postId})
         res.status(200).json({
             message: 'Post deleted successfully',
             data: post,

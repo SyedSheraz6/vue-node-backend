@@ -3,6 +3,9 @@ const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const path = require('path')
+// const { Server } = require('socket.io')
+const cors = require('cors')
+const{ init }  = require('./socket')
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -22,6 +25,7 @@ const MONGOD_DB_URL = 'mongodb+srv://sherazsyed16:TwkxBkv21biHhcNA@cluster0.fwxk
 app.use(bodyParser.json())
 app.use(multer({storage:storage}).single('image'))
 app.use('/images', express.static(path.join(__dirname, 'images' )))
+app.use(cors())
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*')
@@ -47,5 +51,10 @@ app.use((err,req,res,next)=>{
 
 mongoose.connect(MONGOD_DB_URL).then(()=>{
     console.log('Connected')
-    app.listen(3000)
+    const server = app.listen(3000)
+    const io = init(server)
+
+    io.on('connection', (socket) => {
+      console.log('a user connected');
+    });
 })
