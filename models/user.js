@@ -15,6 +15,8 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
+    resetToken: String,
+    resetTokenExpiry: Date,
     posts: [
         {
             type: Schema.Types.ObjectId,
